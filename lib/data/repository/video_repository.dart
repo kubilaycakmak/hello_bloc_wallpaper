@@ -1,4 +1,5 @@
 import 'package:built_collection/built_collection.dart';
+import 'package:hello_bloc_wallpaper/data/model/detail/model_details.dart';
 import 'package:hello_bloc_wallpaper/data/model/search/model_search.dart';
 import 'package:hello_bloc_wallpaper/data/network/data_sources.dart';
 
@@ -34,7 +35,13 @@ class VideoRepository{
   
     return nextPageSearchResult.items;
   }
+  Future<VideoItem> fetchVideoInfo({String id}) async{
+    final videoResponse = await _dataSource.fetchVideoInfo(id: id);
+    if(videoResponse.items.isEmpty) throw NoSuchVideoException();
+    return videoResponse.items[0];
+  }
 }
+
 
 class SearchInitiatedException implements Exception{
   final message = 'Cannot get the next result page without searching first query';
@@ -46,4 +53,8 @@ class NoSearchResultException implements Exception{
 
 class NoNextPageTokenException implements Exception{
   final message = 'Cannot get the next result page';
+}
+
+class NoSuchVideoException implements Exception{
+  final String message = 'No such video';
 }
