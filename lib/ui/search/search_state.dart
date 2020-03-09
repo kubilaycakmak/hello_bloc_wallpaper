@@ -2,13 +2,13 @@ library search_state;
 
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:hello_bloc_wallpaper/data/model/search/model_search.dart';
+import 'package:hello_bloc_wallpaper/data/model/photo/photo_hits.dart';
 
 part 'search_state.g.dart'; 
 
 abstract class SearchState implements Built<SearchState, SearchStateBuilder> {
   bool get isLoading;
-  BuiltList<SearchItem> get searchResults;
+  BuiltList<PhotoHits> get searchResults;
   String get error;
   bool get hasReachedEndOfResults;
 
@@ -22,25 +22,25 @@ abstract class SearchState implements Built<SearchState, SearchStateBuilder> {
   factory SearchState.initial(){
     return SearchState((b) => b
     ..isLoading = false
-    ..searchResults.replace(BuiltList<SearchItem>())
+    ..searchResults.replace(BuiltList<PhotoHits>())
     ..error = ''
     ..hasReachedEndOfResults = false);
   }
     factory SearchState.loading(){
     return SearchState((b) => b
     ..isLoading = true
-    ..searchResults.replace(BuiltList<SearchItem>())
+    ..searchResults.replace(BuiltList<PhotoHits>())
     ..error = ''
     ..hasReachedEndOfResults = false);
   }
     factory SearchState.failure(String error){
     return SearchState((b) => b
     ..isLoading = false
-    ..searchResults.replace(BuiltList<SearchItem>())
+    ..searchResults.replace(BuiltList<PhotoHits>())
     ..error = error
     ..hasReachedEndOfResults = false);
   }
-    factory SearchState.success(BuiltList<SearchItem> resultList){
+    factory SearchState.success(BuiltList<PhotoHits> resultList){
     return SearchState((b) => b
     ..isLoading = false
     ..searchResults.replace(resultList)

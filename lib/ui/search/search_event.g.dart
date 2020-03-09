@@ -9,13 +9,23 @@ part of search_event;
 class _$SearchInitiated extends SearchInitiated {
   @override
   final String query;
+  @override
+  final int page;
+  @override
+  final String orientation;
 
   factory _$SearchInitiated([void Function(SearchInitiatedBuilder) updates]) =>
       (new SearchInitiatedBuilder()..update(updates)).build();
 
-  _$SearchInitiated._({this.query}) : super._() {
+  _$SearchInitiated._({this.query, this.page, this.orientation}) : super._() {
     if (query == null) {
       throw new BuiltValueNullFieldError('SearchInitiated', 'query');
+    }
+    if (page == null) {
+      throw new BuiltValueNullFieldError('SearchInitiated', 'page');
+    }
+    if (orientation == null) {
+      throw new BuiltValueNullFieldError('SearchInitiated', 'orientation');
     }
   }
 
@@ -30,17 +40,24 @@ class _$SearchInitiated extends SearchInitiated {
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is SearchInitiated && query == other.query;
+    return other is SearchInitiated &&
+        query == other.query &&
+        page == other.page &&
+        orientation == other.orientation;
   }
 
   @override
   int get hashCode {
-    return $jf($jc(0, query.hashCode));
+    return $jf(
+        $jc($jc($jc(0, query.hashCode), page.hashCode), orientation.hashCode));
   }
 
   @override
   String toString() {
-    return (newBuiltValueToStringHelper('SearchInitiated')..add('query', query))
+    return (newBuiltValueToStringHelper('SearchInitiated')
+          ..add('query', query)
+          ..add('page', page)
+          ..add('orientation', orientation))
         .toString();
   }
 }
@@ -53,11 +70,21 @@ class SearchInitiatedBuilder
   String get query => _$this._query;
   set query(String query) => _$this._query = query;
 
+  int _page;
+  int get page => _$this._page;
+  set page(int page) => _$this._page = page;
+
+  String _orientation;
+  String get orientation => _$this._orientation;
+  set orientation(String orientation) => _$this._orientation = orientation;
+
   SearchInitiatedBuilder();
 
   SearchInitiatedBuilder get _$this {
     if (_$v != null) {
       _query = _$v.query;
+      _page = _$v.page;
+      _orientation = _$v.orientation;
       _$v = null;
     }
     return this;
@@ -78,7 +105,9 @@ class SearchInitiatedBuilder
 
   @override
   _$SearchInitiated build() {
-    final _$result = _$v ?? new _$SearchInitiated._(query: query);
+    final _$result = _$v ??
+        new _$SearchInitiated._(
+            query: query, page: page, orientation: orientation);
     replace(_$result);
     return _$result;
   }

@@ -1,21 +1,21 @@
 import 'package:bloc/bloc.dart';
-import 'package:hello_bloc_wallpaper/data/model/search/model_search.dart';
-import 'package:hello_bloc_wallpaper/data/repository/video_repository.dart';
+import 'package:hello_bloc_wallpaper/data/model/photo/model_details.dart';
+import 'package:hello_bloc_wallpaper/data/repository/photo_repository.dart';
 import 'package:hello_bloc_wallpaper/ui/search/search_event.dart';
 import 'package:hello_bloc_wallpaper/ui/search/search_state.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
-  final VideoRepository _videoRepository;
+  final PhotoRepository _photoRepository;
 
-  SearchBloc(this._videoRepository) : super();
+  SearchBloc(this._photoRepository) : super();
 
-  void onSearchInitiated(String query){
-    dispatch(SearchInitiated((b) => b..query = query));
+  void onSearchInitiated(String query, int page, String orientation){
+    dispatch(SearchInitiated((b) => b..query = query ..page = page ..orientation = orientation));
   }
 
-  void fetchNextResultPage(){
-    dispatch(FetchNextResultPage());
+  void fetchNextResultPage(int page){
+    dispatch(FetchNextResultPage(page));
   }
 
   @override
@@ -29,7 +29,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     if(event is SearchInitiated){
       yield* mapSearchInitiated(event);
     } else if(event is FetchNextResultPage){
-      yield* mapFetchNextResultPage();
+      yield* mapFetchNextResultPage(event.page);
     }
   }
   Stream<SearchState> mapSearchInitiated(SearchInitiated event) async*{
@@ -38,24 +38,25 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     }else{
       yield SearchState.loading();
       try{
-        final searchResult = await _videoRepository.searchVideos(event.query);
+        final searchResult = await _photoRepository.searchPhotos(event.query, 1, event.orientation);
+        print(event.orientation);
         yield SearchState.success(searchResult);
-      }on SearchError catch(e){
+      }on PhotoError catch(e){
         yield SearchState.failure(e.message);
       }on NoSearchResultException catch(e){
         yield SearchState.failure(e.message);
       }
     }
   }
-  Stream<SearchState> mapFetchNextResultPage() async*{
+  Stream<SearchState> mapFetchNextResultPage(int page) async*{
     try {
-      final nextPageResult = await _videoRepository.fetchNextResultPage();
+      final nextPageResult = await _photoRepository.fetchNextResultPage();
       yield SearchState.success(currentState.searchResults + nextPageResult);
     }on NoNextPageTokenException catch (_) {
       yield currentState.rebuild((b) => b..hasReachedEndOfResults = true);
     }on SearchInitiatedException catch (e) {
       yield SearchState.failure(e.message);
-    }on SearchError catch (e) {
+    }on PhotoError catch (e) {
       yield SearchState.failure(e.message);
     }
   } 

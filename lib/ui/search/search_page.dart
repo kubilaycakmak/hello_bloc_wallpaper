@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hello_bloc_wallpaper/data/model/search/model_search.dart';
-import 'package:hello_bloc_wallpaper/ui/detail/detail_page.dart';
+import 'package:hello_bloc_wallpaper/data/model/photo/photo_hits.dart';
 import 'package:hello_bloc_wallpaper/ui/search/search_bloc.dart';
 import 'package:hello_bloc_wallpaper/ui/search/widget/centered_message.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
 import 'search_state.dart';
+import 'widget/centered_message.dart';
 import 'widget/search_bar.dart';
 
 class SearchPage extends StatefulWidget {
@@ -17,6 +17,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final _searchBloc = kiwi.Container().resolve<SearchBloc>();
   final _scrollController = ScrollController();
+  int pageController = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +44,10 @@ class _SearchPageState extends State<SearchPage> {
         bloc: _searchBloc,
         builder: (context, SearchState state){
           if(state.isInitial){
-            return CenteredMessage(
-              message: 'Start searching!',
-              iconData: Icons.ondemand_video,
-            );
+           return CenteredMessage(
+             message: 'start search photos',
+             iconData: Icons.photo_album,
+           );
           }if(state.isLoading){
             return Center(child: CircularProgressIndicator());
           }if(state.isSuccessful){
@@ -72,7 +73,6 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
-  
   int _calculateListItemCount(SearchState state){
     if(state.hasReachedEndOfResults){
       return state.searchResults.length;
@@ -80,30 +80,34 @@ class _SearchPageState extends State<SearchPage> {
       return state.searchResults.length + 1;
     }
   }
-  
   bool _handleScrollNotification(ScrollNotification notification){
     if(notification is ScrollEndNotification &&
     _scrollController.position.extentAfter == 0){
-      _searchBloc.fetchNextResultPage();
+      _searchBloc.fetchNextResultPage(pageController);
+      setState(() {
+        pageController += 1;
+        print(pageController);
+      });
     }
     return false;
   }
-
-  Widget _buildVideoListItem(SearchItem searchItem){
+  Widget _buildVideoListItem(PhotoHits photoHits){
     return GestureDetector(
-      child: _buildVideoListItemCard(searchItem.snippet),
+      child: _buildVideoListItemCard(photoHits),
       onTap: (){
-        Navigator.push(context, MaterialPageRoute(
-          builder: (_){
-            return DetailPage(videoId: searchItem.id.videoId,);
-           }
-          )
-        );
+        print('haha');
       },
+      // onTap: (){
+      //   Navigator.push(context, MaterialPageRoute(
+      //     builder: (_){
+      //       return DetailPage(videoId: searchItem.id.videoId,);
+      //      }
+      //     )
+      //   );
+      // },
     );
   }
-
-  Widget _buildVideoListItemCard(SearchSnippet videoSnippet){
+  Widget _buildVideoListItemCard(PhotoHits photoHits){
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -111,22 +115,20 @@ class _SearchPageState extends State<SearchPage> {
           children: <Widget>[
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: Image.network(videoSnippet.thumbnails.high.url, fit: BoxFit.cover,
+              child: Image.network(photoHits.webformatURL, fit: BoxFit.cover,
               )
             ),
             SizedBox(height: 5,),
-            Text(videoSnippet.title, maxLines: 1, textScaleFactor: 1.1, style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.start, overflow: TextOverflow.ellipsis,)
+            Text(photoHits.id.toString(), maxLines: 1, textScaleFactor: 1.1, style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.start, overflow: TextOverflow.ellipsis,)
           ],
         ),
       ),
     );
   }
 }
-
-
-
 Widget _buildLoaderListItem(){
   return Center(
     child: CircularProgressIndicator(),
+    heightFactor: 2,
   );
 }

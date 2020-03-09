@@ -16,6 +16,7 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
+  String orientation;
 
   @override
   void initState() {
@@ -29,22 +30,56 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
+    return buildTextField(context);
+  }
+
+  TextField buildTextField(BuildContext context) {
     return TextField(
-      focusNode: _focusNode,
-      controller: _controller,
-      decoration: InputDecoration(
-        hintText: '\tSearch Videos',
-        hintStyle: TextStyle(
-        ),
-        border: InputBorder.none,
-        icon: Padding(
-          padding: const EdgeInsets.only(left: 10.0),
-          child: Icon(Icons.search, color: Colors.white70,),
-        )
+    focusNode: _focusNode,
+    controller: _controller,
+    decoration: InputDecoration(
+      hintText: '\tSearch Videos',
+      hintStyle: TextStyle(
       ),
-      onSubmitted: (searchQuery){
-        BlocProvider.of<SearchBloc>(context).onSearchInitiated(searchQuery);
-      },
-    );
+      border: InputBorder.none,
+      icon: Padding(
+        padding: const EdgeInsets.only(left: 10.0),
+        child: Icon(Icons.search, color: Colors.white70,),
+      ),
+      suffixIcon: PopupMenuButton(
+        onSelected: (value){
+          setState(() {
+            orientation = value;
+          });
+        },
+        icon: Icon(Icons.more_horiz),
+        itemBuilder: (BuildContext context) { 
+          var list = List<PopupMenuEntry<Object>>();
+          list.add(PopupMenuItem(
+            child: Text('Vertical'),
+            value: 'vertical',
+          ));
+          list.add(
+            PopupMenuDivider(
+              height: 10,
+            ),
+          );
+          list.add(PopupMenuItem(
+            child: Text('Horizontal'),
+            value: 'horizontal',
+          ));
+          return list;
+         },
+      )
+    ),
+    onSubmitted: (searchQuery){
+      print(orientation);
+      if(orientation == null){
+        BlocProvider.of<SearchBloc>(context).onSearchInitiated(searchQuery, 1, 'vertical');
+      }else{
+        BlocProvider.of<SearchBloc>(context).onSearchInitiated(searchQuery, 1, orientation);
+      }
+    },
+  );
   }
 }
